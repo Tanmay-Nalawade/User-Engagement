@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: user-engagement-config
+  namespace: user-engagement
+data:
+  PORT: "8080"
