@@ -25,7 +25,7 @@ npm install
 npm start
 ```
 
-Health check: `GET http://localhost:8080/health`
+Interests endpoint: `GET http://localhost:8080/interests`
 
 ## Docker
 
@@ -88,7 +88,7 @@ kubectl get svc -n user-engagement user-engagement-api -w
 When `EXTERNAL-IP` is assigned, call:
 
 ```bash
-curl http://<EXTERNAL-IP>/health
+curl http://<EXTERNAL-IP>/interests
 ```
 
 **minikube:** LoadBalancer Services stay `<pending>` until you run `minikube tunnel` in another terminal (requires sudo on some setups).

@@ -4,7 +4,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 
 const { connectDatabase } = require("./config/database");
-const healthRoutes = require("./routes/health");
+const interestsRoutes = require("./routes/interests");
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -21,7 +21,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use("/health", healthRoutes);
+app.use("/interests", interestsRoutes);
 
 const startServer = async () => {
   try {
