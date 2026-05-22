@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { createInterests } from "./api";
+import { BrandLogo } from "./components/BrandLogo";
 import HeartbeatBar from "./components/HeartbeatBar";
 import "./App.css";
 
@@ -106,6 +108,7 @@ function StepShell({ stepIndex, total, title, hint, children, nav }) {
 }
 
 export default function App() {
+  const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [form, setForm] = useState(INITIAL);
   const [submitting, setSubmitting] = useState(false);
@@ -181,7 +184,7 @@ export default function App() {
         throw new Error("Save failed — no id returned from API");
       }
       setSavedId(result.interests.id);
-      setStep(steps.length);
+      navigate("/dashboard", { replace: true });
     } catch (err) {
       setError(err.message);
     } finally {
@@ -493,11 +496,9 @@ export default function App() {
           {!isSuccess && (
             <header className="header">
               <div className="header__brand">
-                <div className="header__icon" aria-hidden>
-                  ♥
-                </div>
+                <BrandLogo asLink={false} size={48} className="detect-brand--header" />
                 <div>
-                  <p className="header__title">Epi-Guard Profile</p>
+                  <p className="header__title">Health profile</p>
                   <p className="header__subtitle">
                     Pandemic prevention · Health interests
                   </p>

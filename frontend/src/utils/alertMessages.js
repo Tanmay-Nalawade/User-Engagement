@@ -50,6 +50,45 @@ export async function loadPublicAlertMessages() {
 
 export const PAGE_SIZE = 30;
 
+export const SORT_OPTIONS = {
+  newest: "Latest first",
+  oldest: "Oldest first",
+  upstamps: "Most upstamps",
+};
+
+/** Milliseconds for sorting (alerts, user posts, ISO timestamps). */
+export function getMessageSortTime(msg) {
+  if (typeof msg.timestampSort === "number" && msg.timestampSort > 0) {
+    return msg.timestampSort;
+  }
+
+  if (String(msg.messageRef || "").startsWith("local-")) {
+    const ms = Number(String(msg.messageRef).replace("local-", ""));
+    if (!Number.isNaN(ms)) return ms;
+  }
+
+  const parsed = new Date(msg.timestamp);
+  return Number.isNaN(parsed.getTime()) ? 0 : parsed.getTime();
+}
+
+export function sortMessages(messages, order = "newest") {
+  const list = [...messages];
+
+  if (order === "oldest") {
+    return list.sort((a, b) => getMessageSortTime(a) - getMessageSortTime(b));
+  }
+
+  if (order === "upstamps") {
+    return list.sort(
+      (a, b) =>
+        b.upstampCount - a.upstampCount ||
+        getMessageSortTime(b) - getMessageSortTime(a),
+    );
+  }
+
+  return list.sort((a, b) => getMessageSortTime(b) - getMessageSortTime(a));
+}
+
 export function filterMessages(messages, { category, locationQuery, search }) {
   const loc = locationQuery?.trim().toLowerCase();
   const q = search?.trim().toLowerCase();

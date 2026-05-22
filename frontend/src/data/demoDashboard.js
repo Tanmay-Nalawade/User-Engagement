@@ -121,7 +121,7 @@ export const DEMO_DASHBOARD = {
     },
     {
       id: "c12",
-      title: "Epi-Guard Merch Pack",
+      title: "Wellness Merch Pack",
       description: "Sticker + wristband wellness kit.",
       category: "Rewards",
       geographicArea: "Anywhere",

@@ -16,6 +16,8 @@ import {
   filterMessages,
   loadPublicAlertMessages,
   PAGE_SIZE,
+  sortMessages,
+  SORT_OPTIONS,
 } from "../utils/alertMessages";
 import "./CommunityTimeline.css";
 
@@ -27,6 +29,7 @@ export default function CommunityTimeline() {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [locationFilter, setLocationFilter] = useState("");
   const [search, setSearch] = useState("");
+  const [sortOrder, setSortOrder] = useState("newest");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [upstampingRef, setUpstampingRef] = useState(null);
@@ -51,15 +54,14 @@ export default function CommunityTimeline() {
     loadTimeline();
   }, [loadTimeline]);
 
-  const filtered = useMemo(
-    () =>
-      filterMessages(allMessages, {
-        category: categoryFilter,
-        locationQuery: locationFilter,
-        search,
-      }),
-    [allMessages, categoryFilter, locationFilter, search],
-  );
+  const filtered = useMemo(() => {
+    const matches = filterMessages(allMessages, {
+      category: categoryFilter,
+      locationQuery: locationFilter,
+      search,
+    });
+    return sortMessages(matches, sortOrder);
+  }, [allMessages, categoryFilter, locationFilter, search, sortOrder]);
 
   const visible = filtered.slice(0, visibleCount);
   const hasMore = visibleCount < filtered.length;
@@ -74,16 +76,18 @@ export default function CommunityTimeline() {
       return;
     }
 
+    const now = Date.now();
     const localMessage = normalizeMessage({
-      message_ref: `local-${Date.now()}`,
+      message_ref: `local-${now}`,
       author: trimmedAuthor,
       body: trimmedBody,
-      timestamp: new Date().toISOString(),
+      timestamp: new Date(now).toISOString(),
       upstamp_count: 0,
       category: "Community",
       topic: "User post",
       location: locationFilter || "Local",
     });
+    localMessage.timestampSort = now;
 
     setAllMessages((prev) => [localMessage, ...prev]);
     setBody("");
@@ -188,7 +192,25 @@ export default function CommunityTimeline() {
         <Card className="mb-4 border-0 shadow-sm">
           <Card.Body>
             <Row className="g-3">
-              <Col md={3}>
+              <Col xs={12} md={3}>
+                <Form.Group>
+                  <Form.Label>Sort by</Form.Label>
+                  <Form.Select
+                    value={sortOrder}
+                    onChange={(e) => {
+                      setSortOrder(e.target.value);
+                      setVisibleCount(PAGE_SIZE);
+                    }}
+                  >
+                    {Object.entries(SORT_OPTIONS).map(([value, label]) => (
+                      <option key={value} value={value}>
+                        {label}
+                      </option>
+                    ))}
+                  </Form.Select>
+                </Form.Group>
+              </Col>
+              <Col xs={12} md={3}>
                 <Form.Group>
                   <Form.Label>Category</Form.Label>
                   <Form.Select
@@ -205,7 +227,7 @@ export default function CommunityTimeline() {
                   </Form.Select>
                 </Form.Group>
               </Col>
-              <Col md={3}>
+              <Col xs={12} md={3}>
                 <Form.Group>
                   <Form.Label>Location (ZIP or area)</Form.Label>
                   <Form.Control
@@ -218,7 +240,7 @@ export default function CommunityTimeline() {
                   />
                 </Form.Group>
               </Col>
-              <Col md={6}>
+              <Col xs={12} md={3}>
                 <Form.Group>
                   <Form.Label>Search</Form.Label>
                   <Form.Control
@@ -227,7 +249,7 @@ export default function CommunityTimeline() {
                       setSearch(e.target.value);
                       setVisibleCount(PAGE_SIZE);
                     }}
-                    placeholder="Topic, guidance, or message text"
+                    placeholder="Topic or message text"
                   />
                 </Form.Group>
               </Col>

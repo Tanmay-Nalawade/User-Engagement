@@ -133,7 +133,7 @@ export default function Dashboard() {
         <Container>
           <Row className="align-items-end g-4">
             <Col xs={12} md={4}>
-              <p className="dashboard-hero__label mb-1">Epi-Guard Rewards</p>
+              <p className="dashboard-hero__label mb-1">Rewards</p>
               <div className="dashboard-hero__points">{points}</div>
               <p className="mb-0">Wellness points earned</p>
             </Col>

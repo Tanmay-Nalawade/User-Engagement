@@ -1,6 +1,7 @@
 import { Link, Route, Routes } from "react-router-dom";
 import { Container, Nav, Navbar } from "react-bootstrap";
 import App from "./App";
+import { BrandLogo } from "./components/BrandLogo";
 import Dashboard from "./components/Dashboard";
 import DashboardErrorBoundary from "./components/DashboardErrorBoundary";
 import CommunityTimeline from "./components/CommunityTimeline";
@@ -8,10 +9,10 @@ import CommunityTimeline from "./components/CommunityTimeline";
 export default function AppRouter() {
   return (
     <>
-      <Navbar bg="white" expand="md" className="shadow-sm py-2">
+      <Navbar bg="white" expand="md" className="shadow-sm detect-navbar">
         <Container>
-          <Navbar.Brand as={Link} to="/" className="fw-bold text-success">
-            Epi-Guard
+          <Navbar.Brand as="div" className="detect-navbar__brand p-0 m-0">
+            <BrandLogo className="detect-brand--navbar" />
           </Navbar.Brand>
           <Navbar.Toggle aria-controls="nav" />
           <Navbar.Collapse id="nav">
