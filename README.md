@@ -25,7 +25,35 @@ npm install
 npm start
 ```
 
-Interests endpoint: `GET http://localhost:8080/interests`
+Health check: `GET http://localhost:8080/health`
+
+## Interests API
+
+No authentication. Records are identified by MongoDB `_id`.
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/interests` | List all interests profiles |
+| `POST` | `/interests` | Create a new profile |
+| `GET` | `/interests/:id` | Read one profile |
+| `PUT` | `/interests/:id` | Replace a profile |
+| `PATCH` | `/interests/:id` | Partial update |
+| `DELETE` | `/interests/:id` | Delete a profile |
+
+Example create body:
+
+```json
+{
+  "householdMembers": 3,
+  "timeOutdoors": "1-2 hours daily",
+  "occupation": "Healthcare worker",
+  "animalContact": true,
+  "housingAndAC": "AC",
+  "hobbies": ["hiking", "gardening"]
+}
+```
+
+`housingAndAC` must be one of: `AC`, `Swamp Cooler`, `None`.
 
 ## Docker
 

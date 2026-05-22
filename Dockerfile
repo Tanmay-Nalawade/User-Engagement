@@ -7,6 +7,10 @@ RUN npm ci --omit=dev 2>/dev/null || npm install --omit=dev
 
 COPY app.js ./
 COPY config ./config
+COPY models ./models
+COPY middleware ./middleware
+COPY controllers ./controllers
+COPY validators ./validators
 COPY routes ./routes
 
 ENV NODE_ENV=production

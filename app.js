@@ -4,7 +4,9 @@ const express = require("express");
 const bodyParser = require("body-parser");
 
 const { connectDatabase } = require("./config/database");
+const healthRoutes = require("./routes/health");
 const interestsRoutes = require("./routes/interests");
+const { errorHandler } = require("./middleware/errorHandler");
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -17,11 +19,17 @@ app.use((req, res, next) => {
     "Access-Control-Allow-Methods",
     "OPTIONS, GET, POST, PUT, PATCH, DELETE",
   );
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(204);
+  }
   next();
 });
 
+app.use("/health", healthRoutes);
 app.use("/interests", interestsRoutes);
+
+app.use(errorHandler);
 
 const startServer = async () => {
   try {
