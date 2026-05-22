@@ -22,6 +22,47 @@ cp .env.example .env
 
 Health check: `GET http://localhost:8080/health`
 
+### MongoDB in Docker (`querySrv ECONNREFUSED`)
+
+If logs show:
+
+```text
+querySrv ECONNREFUSED _mongodb._tcp.epihack.ouae2c8.mongodb.net
+```
+
+the cluster hostname is often fine, but **DNS inside the container** cannot resolve `mongodb+srv` records.
+
+1. **Rebuild** (this repo sets public DNS on the API service):
+
+   ```bash
+   docker compose down
+   docker compose up --build
+   ```
+
+2. **Check `.env`** — paste the full string from Atlas → **Connect** → **Drivers** (not a shortened host). Example shape:
+
+   ```env
+   MONGODB_URI=mongodb+srv://USER:PASS@epihack.ouae2c8.mongodb.net/user-engagement?retryWrites=true&w=majority
+   ```
+
+   URL-encode `@`, `#`, `%`, etc. in the password.
+
+3. **Fallback — standard URI** (no SRV): in Atlas Connect, choose connection string with `mongodb://` and three `shard-00-*.mongodb.net:27017` hosts. Put it in `.env` as:
+
+   ```env
+   MONGODB_URI_STANDARD=mongodb://USER:PASS@host1:27017,host2:27017,host3:27017/user-engagement?ssl=true&authSource=admin
+   ```
+
+4. **Network Access** in Atlas must allow your IP.
+
+Test from your Mac (outside Docker):
+
+```bash
+dig +short SRV _mongodb._tcp.epihack.ouae2c8.mongodb.net
+```
+
+If that returns lines, DNS is OK on the host; use steps 1–3 for Docker.
+
 ## Interests API
 
 Each profile may include an optional **`user`** field (set by another service when linking accounts — not collected in this form).
@@ -41,7 +82,7 @@ Example create body:
 
 ```json
 {
-  "user": "auth0|abc123",
+  "user": "user-42",
   "householdMembers": 3,
   "timeOutdoors": "1-2 hours daily",
   "occupation": "Healthcare worker",
@@ -54,6 +95,33 @@ Example create body:
 
 `housingAndAC` must be one of: `AC`, `Swamp Cooler`, `None`.
 
+## Gamified dashboard
+
+Users earn points from **weekly check-ins** and unlock localized coupons at **200 points**.
+
+| Streak week | Points |
+|-------------|--------|
+| Week 1 | +10 |
+| Week 2 (consecutive) | +10 |
+| Week 3 (consecutive) | +50 (cycle resets) |
+
+Missed week (>14 days): streak resets to week 1 (+10). Cannot check in twice within 7 days.
+
+### API (no auth, single shared profile)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/api/check-in` | Weekly check-in |
+| `GET` | `/api/dashboard?location=Phoenix` | Points, streak, coupons |
+
+One engagement record in **`users`** (`models/User.js`): `points`, `consecutiveWeeks`, `lastCheckIn`, `location`, optional `interests` (synced from the latest health profile submission).
+
+### Frontend
+
+Open the dashboard at **http://localhost:5173/dashboard** (Vite) or **http://localhost:3000/dashboard** (Docker) — no login required.
+
+Port **8080** is API-only (no React UI). Coupon cards appear **blurred/locked** until you reach 200 points.
+
 ## Run everything with Docker Compose (recommended)
 
 Starts the **API** and **frontend** — no local `npm install` required.
@@ -65,11 +133,18 @@ docker compose up --build
 
 | Service | URL |
 |---------|-----|
-| **Frontend (health form)** | http://localhost:3000 |
+| **Frontend (Docker)** | http://localhost:3000 |
+| **Frontend (Vite dev)** | http://localhost:5173 |
+| **Rewards dashboard** | `/dashboard` on either UI port above |
 | **API** | http://localhost:8080 |
 | **API health** | http://localhost:8080/health |
+| **Interests API** | http://localhost:8080/interests |
 
-The frontend calls the API at `http://localhost:8080` from your browser (CORS enabled). After submit, verify data:
+**Vite dev (`npm run dev`):** UI on **5173**, API on **8080**. Leave `frontend/.env` `VITE_API_URL` empty so Vite proxies API paths to 8080.
+
+**Docker UI:** built with `VITE_API_URL=http://localhost:8080` (browser calls API directly; CORS enabled).
+
+After submit, verify data:
 
 ```bash
 curl http://localhost:8080/interests

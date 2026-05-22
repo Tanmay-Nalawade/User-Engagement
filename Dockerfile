@@ -12,6 +12,8 @@ COPY middleware ./middleware
 COPY controllers ./controllers
 COPY validators ./validators
 COPY routes ./routes
+COPY constants ./constants
+COPY data ./data
 
 ENV NODE_ENV=production
 EXPOSE 8080

@@ -1,0 +1,103 @@
+.dashboard-page {
+  min-height: 100vh;
+  background: linear-gradient(160deg, #e0f2fe 0%, #ccfbf1 45%, #f8fafc 100%);
+  padding-bottom: 3rem;
+}
+
+.dashboard-hero {
+  background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%);
+  color: #fff;
+  border-radius: 0 0 24px 24px;
+  padding: 2rem 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 12px 40px rgba(15, 118, 110, 0.25);
+}
+
+.dashboard-hero__points {
+  font-size: 2.75rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.dashboard-hero__label {
+  opacity: 0.9;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.dashboard-progress .progress {
+  height: 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.dashboard-progress .progress-bar {
+  background: linear-gradient(90deg, #fef08a, #fbbf24);
+  font-weight: 600;
+  font-size: 0.7rem;
+}
+
+.coupon-card {
+  height: 100%;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: none;
+  box-shadow: 0 8px 24px rgba(15, 118, 110, 0.1);
+}
+
+.coupon-card:not(.coupon-card--frozen):hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 32px rgba(15, 118, 110, 0.18);
+}
+
+.coupon-card--frozen {
+  opacity: 0.75;
+  position: relative;
+  overflow: hidden;
+}
+
+.coupon-card--frozen .coupon-card__body {
+  filter: blur(4px);
+  user-select: none;
+  pointer-events: none;
+}
+
+.coupon-card__lock {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.55);
+  z-index: 2;
+  text-align: center;
+  padding: 1rem;
+}
+
+.coupon-card__lock-icon {
+  font-size: 2rem;
+  margin-bottom: 0.35rem;
+}
+
+.coupon-card__code {
+  font-family: "DM Sans", monospace;
+  font-weight: 700;
+  font-size: 1.1rem;
+  letter-spacing: 0.08em;
+  color: #0f766e;
+  background: #f0fdfa;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  display: inline-block;
+}
+
+.coupon-card__code--live {
+  filter: none;
+}
+
+.check-in-btn {
+  font-weight: 600;
+  padding: 0.75rem 2rem;
+  border-radius: 14px;
+}

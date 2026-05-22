@@ -22,6 +22,12 @@ const errorHandler = (err, req, res, next) => {
     });
   }
 
+  if (typeof err.status === "number" && err.status >= 400) {
+    return res.status(err.status).json({
+      error: err.message,
+    });
+  }
+
   console.error(err);
   res.status(500).json({ error: "Internal server error" });
 };

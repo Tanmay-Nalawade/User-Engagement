@@ -8,6 +8,7 @@ export default defineConfig({
     proxy: {
       "/interests": "http://localhost:8080",
       "/health": "http://localhost:8080",
+      "/api": "http://localhost:8080",
     },
   },
 });

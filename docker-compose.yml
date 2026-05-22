@@ -7,6 +7,10 @@ services:
       - "8080:8080"
     env_file:
       - .env
+    # Docker’s default DNS often fails mongodb+srv (querySrv ECONNREFUSED)
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
     healthcheck:
       test:
         [
@@ -23,6 +27,7 @@ services:
     build:
       context: ./frontend
       args:
+        # Browser calls API directly (CORS enabled on :8080)
         VITE_API_URL: http://localhost:8080
     image: user-engagement-frontend:latest
     container_name: user-engagement-frontend

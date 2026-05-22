@@ -6,6 +6,7 @@ const bodyParser = require("body-parser");
 const { connectDatabase } = require("./config/database");
 const healthRoutes = require("./routes/health");
 const interestsRoutes = require("./routes/interests");
+const dashboardRoutes = require("./routes/dashboardRoutes");
 const { errorHandler } = require("./middleware/errorHandler");
 
 const app = express();
@@ -35,6 +36,7 @@ app.use((req, res, next) => {
 
 app.use("/health", healthRoutes);
 app.use("/interests", interestsRoutes);
+app.use("/api", dashboardRoutes);
 
 app.use(errorHandler);
 
