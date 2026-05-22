@@ -3,16 +3,14 @@ const HOUSING_OPTIONS = ["AC", "Swamp Cooler", "None"];
 const isNonEmptyString = (value) =>
   typeof value === "string" && value.trim().length > 0;
 
-const validateHobbies = (hobbies) => {
-  if (!Array.isArray(hobbies)) {
-    return "hobbies must be an array of strings";
+const validateStringArray = (arr, fieldName) => {
+  if (!Array.isArray(arr)) {
+    return `${fieldName} must be an array of strings`;
   }
-
-  const invalid = hobbies.some((h) => typeof h !== "string");
+  const invalid = arr.some((item) => typeof item !== "string" || !item.trim());
   if (invalid) {
-    return "hobbies must be an array of strings";
+    return `${fieldName} must be an array of non-empty strings`;
   }
-
   return null;
 };
 
@@ -34,7 +32,10 @@ const validateInterestsBody = (body, { partial = false } = {}) => {
       }
     }
   } else if (!fields.some((field) => body[field] !== undefined)) {
-    errors.push("At least one interest field must be provided");
+    const hasAnimalTypes = body.animalTypes !== undefined;
+    if (!hasAnimalTypes) {
+      errors.push("At least one interest field must be provided");
+    }
   }
 
   if (body.householdMembers !== undefined) {
@@ -62,6 +63,29 @@ const validateInterestsBody = (body, { partial = false } = {}) => {
     errors.push("animalContact must be a boolean");
   }
 
+  if (body.animalTypes !== undefined) {
+    const animalTypesError = validateStringArray(body.animalTypes, "animalTypes");
+    if (animalTypesError) {
+      errors.push(animalTypesError);
+    }
+  }
+
+  const animalContact = body.animalContact;
+  const animalTypes = body.animalTypes;
+
+  if (animalContact === true) {
+    const types = animalTypes ?? [];
+    if (!Array.isArray(types) || types.length === 0) {
+      errors.push(
+        "animalTypes is required with at least one animal when animalContact is true",
+      );
+    }
+  }
+
+  if (animalContact === false && animalTypes?.length > 0) {
+    errors.push("animalTypes must be empty when animalContact is false");
+  }
+
   if (body.housingAndAC !== undefined) {
     if (!isNonEmptyString(body.housingAndAC)) {
       errors.push("housingAndAC must be a non-empty string");
@@ -73,7 +97,7 @@ const validateInterestsBody = (body, { partial = false } = {}) => {
   }
 
   if (body.hobbies !== undefined) {
-    const hobbyError = validateHobbies(body.hobbies);
+    const hobbyError = validateStringArray(body.hobbies, "hobbies");
     if (hobbyError) {
       errors.push(hobbyError);
     }

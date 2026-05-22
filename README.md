@@ -4,10 +4,9 @@ Node.js microservice for user engagement, backed by MongoDB Atlas, containerized
 
 ## Prerequisites
 
-- Node.js 20+
-- Docker
-- `kubectl` and a Kubernetes cluster (Docker Desktop Kubernetes, minikube, or a cloud cluster)
+- Docker and Docker Compose
 - MongoDB Atlas cluster and connection string
+- `kubectl` (optional, for Kubernetes)
 
 ## MongoDB Atlas
 
@@ -16,13 +15,9 @@ Node.js microservice for user engagement, backed by MongoDB Atlas, containerized
 3. Under **Network Access**, allow your IP (or `0.0.0.0/0` for development only).
 4. Copy the connection string (`mongodb+srv://...`) and set it as `MONGODB_URI`.
 
-Local development:
-
 ```bash
 cp .env.example .env
 # Edit .env and set MONGODB_URI
-npm install
-npm start
 ```
 
 Health check: `GET http://localhost:8080/health`
@@ -48,6 +43,7 @@ Example create body:
   "timeOutdoors": "1-2 hours daily",
   "occupation": "Healthcare worker",
   "animalContact": true,
+  "animalTypes": ["Chickens", "Goats", "Dogs"],
   "housingAndAC": "AC",
   "hobbies": ["hiking", "gardening"]
 }
@@ -55,14 +51,50 @@ Example create body:
 
 `housingAndAC` must be one of: `AC`, `Swamp Cooler`, `None`.
 
-## Docker
+## Run everything with Docker Compose (recommended)
 
-Build and run locally:
+Starts the **API** and **frontend** — no local `npm install` required.
+
+```bash
+cp .env.example .env   # set MONGODB_URI
+docker compose up --build
+```
+
+| Service | URL |
+|---------|-----|
+| **Frontend (health form)** | http://localhost:3000 |
+| **API** | http://localhost:8080 |
+| **API health** | http://localhost:8080/health |
+
+The frontend calls the API at `http://localhost:8080` from your browser (CORS enabled). After submit, verify data:
+
+```bash
+curl http://localhost:8080/interests
+```
+
+In MongoDB Atlas, look at database **`user-engagement`** (from your connection string) → collection **`interests`**.
+
+Stop:
+
+```bash
+docker compose down
+```
+
+## Frontend only (Docker)
+
+```bash
+docker compose up --build api      # API on :8080
+docker compose up --build frontend # UI on :3000 (needs api running)
+```
+
+## API only (Docker)
 
 ```bash
 docker build -t user-engagement-api:latest .
 docker run --rm -p 8080:8080 --env-file .env user-engagement-api:latest
 ```
+
+Healthcare-themed multi-step form: one quick question per screen (~10 seconds). Submit on the last step to `POST /interests`.
 
 For Kubernetes, the image name in `k8s/deployment.yaml` must match what you build. With minikube, load the image into the cluster:
 

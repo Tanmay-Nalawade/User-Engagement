@@ -6,6 +6,7 @@ const formatInterests = (doc) => ({
   timeOutdoors: doc.timeOutdoors,
   occupation: doc.occupation,
   animalContact: doc.animalContact,
+  animalTypes: doc.animalTypes ?? [],
   housingAndAC: doc.housingAndAC,
   hobbies: doc.hobbies ?? [],
   createdAt: doc.createdAt,
@@ -17,6 +18,7 @@ const buildPayload = (body) => ({
   timeOutdoors: body.timeOutdoors.trim(),
   occupation: body.occupation.trim(),
   animalContact: body.animalContact,
+  animalTypes: body.animalContact ? (body.animalTypes ?? []) : [],
   housingAndAC: body.housingAndAC.trim(),
   hobbies: body.hobbies ?? [],
 });
@@ -47,6 +49,7 @@ const listInterests = async (req, res, next) => {
 const createInterests = async (req, res, next) => {
   try {
     const doc = await Interests.create(buildPayload(req.body));
+    console.log(`Created interests ${doc._id} in collection: interests`);
     res.status(201).json({ interests: formatInterests(doc) });
   } catch (error) {
     next(error);
@@ -84,6 +87,12 @@ const updateInterests = async (req, res, next) => {
     }
     if (req.body.animalContact !== undefined) {
       updates.animalContact = req.body.animalContact;
+    }
+    if (req.body.animalTypes !== undefined) {
+      updates.animalTypes = req.body.animalTypes;
+    }
+    if (req.body.animalContact === false) {
+      updates.animalTypes = [];
     }
     if (req.body.housingAndAC !== undefined) {
       updates.housingAndAC = req.body.housingAndAC.trim();

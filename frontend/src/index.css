@@ -1,0 +1,33 @@
+:root {
+  --teal-900: #134e4a;
+  --teal-700: #0f766e;
+  --teal-500: #14b8a6;
+  --teal-100: #ccfbf1;
+  --sky-100: #e0f2fe;
+  --white: #ffffff;
+  --slate-700: #334155;
+  --slate-500: #64748b;
+  --shadow: 0 20px 50px rgba(15, 118, 110, 0.15);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "DM Sans", system-ui, sans-serif;
+  color: var(--slate-700);
+  background: linear-gradient(160deg, var(--sky-100) 0%, var(--teal-100) 45%, #f8fafc 100%);
+}
+
+#root {
+  min-height: 100vh;
+}
+
+button {
+  font-family: inherit;
+}

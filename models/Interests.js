@@ -21,6 +21,10 @@ const interestsSchema = new mongoose.Schema(
       type: Boolean,
       required: true,
     },
+    animalTypes: {
+      type: [String],
+      default: [],
+    },
     housingAndAC: {
       type: String,
       required: true,

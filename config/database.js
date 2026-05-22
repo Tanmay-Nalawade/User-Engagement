@@ -13,7 +13,8 @@ const connectDatabase = async () => {
     serverSelectionTimeoutMS: 10000,
   });
 
-  console.log("Connected to MongoDB Atlas");
+  const { host, name } = mongoose.connection;
+  console.log(`Connected to MongoDB — database: ${name}, host: ${host}`);
 };
 
 module.exports = { connectDatabase, mongoose };
