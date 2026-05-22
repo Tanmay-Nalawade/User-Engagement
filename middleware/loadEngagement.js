@@ -1,5 +1,6 @@
 const User = require("../models/User");
 const Interests = require("../models/Interests");
+const { ensureDemoProfile } = require("../data/demoEngagement");
 
 /** Loads or creates the single app engagement profile (no auth, no user id). */
 const loadEngagement = async (req, res, next) => {
@@ -9,6 +10,8 @@ const loadEngagement = async (req, res, next) => {
     if (!profile) {
       profile = await User.create({});
     }
+
+    await ensureDemoProfile(profile);
 
     const interestsDoc = await Interests.findOne().sort({ updatedAt: -1 });
     if (interestsDoc) {

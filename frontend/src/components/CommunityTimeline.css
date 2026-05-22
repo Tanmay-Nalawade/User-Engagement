@@ -1,0 +1,71 @@
+.community-timeline {
+  min-height: calc(100vh - 56px);
+  background: linear-gradient(160deg, #e0f2fe 0%, #f0fdfa 50%, #f8fafc 100%);
+  padding-bottom: 3rem;
+}
+
+.community-timeline__header {
+  background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%);
+  color: #fff;
+  border-radius: 0 0 20px 20px;
+  padding: 1.75rem 0 2rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 10px 32px rgba(15, 118, 110, 0.2);
+}
+
+.community-timeline__header h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+}
+
+.community-compose-card {
+  border: none;
+  border-radius: 16px;
+  box-shadow: 0 8px 28px rgba(15, 118, 110, 0.12);
+}
+
+.community-message-card {
+  border: none;
+  border-radius: 14px;
+  box-shadow: 0 4px 18px rgba(15, 118, 110, 0.08);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.community-message-card:hover {
+  box-shadow: 0 8px 24px rgba(15, 118, 110, 0.14);
+}
+
+.community-message-card__author {
+  font-weight: 600;
+  color: #0f766e;
+}
+
+.community-message-card__time {
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.community-message-card__body {
+  color: #334155;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.community-upstamp-btn {
+  border-radius: 999px;
+  font-weight: 600;
+  min-width: 7rem;
+}
+
+.community-upstamp-btn--active {
+  background: #0f766e;
+  border-color: #0f766e;
+  color: #fff;
+}
+
+.community-feed-empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #64748b;
+}

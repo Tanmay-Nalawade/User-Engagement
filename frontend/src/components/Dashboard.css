@@ -26,16 +26,34 @@
   letter-spacing: 0.06em;
 }
 
-.dashboard-progress .progress {
+.dashboard-hero__heading {
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.dashboard-hero__sub {
+  opacity: 0.85;
+  color: #fff;
+}
+
+.dashboard-progress__bar {
   height: 14px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.25);
 }
 
-.dashboard-progress .progress-bar {
+.dashboard-progress__bar .progress-bar {
   background: linear-gradient(90deg, #fef08a, #fbbf24);
   font-weight: 600;
   font-size: 0.7rem;
+  color: #134e4a;
+}
+
+.dashboard-body {
+  color: #334155;
+  position: relative;
+  z-index: 1;
 }
 
 .coupon-card {
@@ -45,55 +63,45 @@
   box-shadow: 0 8px 24px rgba(15, 118, 110, 0.1);
 }
 
-.coupon-card:not(.coupon-card--frozen):hover {
+.coupon-card--unlocked {
+  border-left: 4px solid #14b8a6;
+}
+
+.coupon-card--unlocked:hover {
   transform: translateY(-4px);
   box-shadow: 0 14px 32px rgba(15, 118, 110, 0.18);
 }
 
-.coupon-card--frozen {
-  opacity: 0.75;
-  position: relative;
-  overflow: hidden;
+.coupon-card--locked {
+  border-left: 4px solid #cbd5e1;
+  background: #f8fafc;
 }
 
-.coupon-card--frozen .coupon-card__body {
-  filter: blur(4px);
-  user-select: none;
-  pointer-events: none;
-}
-
-.coupon-card__lock {
-  position: absolute;
-  inset: 0;
+.coupon-card__body {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.55);
-  z-index: 2;
-  text-align: center;
-  padding: 1rem;
-}
-
-.coupon-card__lock-icon {
-  font-size: 2rem;
-  margin-bottom: 0.35rem;
+  min-height: 220px;
 }
 
 .coupon-card__code {
   font-family: "DM Sans", monospace;
   font-weight: 700;
-  font-size: 1.1rem;
-  letter-spacing: 0.08em;
-  color: #0f766e;
-  background: #f0fdfa;
+  font-size: 0.95rem;
+  letter-spacing: 0.06em;
   padding: 0.5rem 0.75rem;
   border-radius: 8px;
-  display: inline-block;
+  margin-top: auto;
 }
 
 .coupon-card__code--live {
-  filter: none;
+  color: #0f766e;
+  background: #f0fdfa;
+}
+
+.coupon-card__code--locked {
+  color: #64748b;
+  background: #e2e8f0;
+  font-weight: 600;
 }
 
 .check-in-btn {

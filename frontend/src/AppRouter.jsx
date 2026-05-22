@@ -2,6 +2,8 @@ import { Link, Route, Routes } from "react-router-dom";
 import { Container, Nav, Navbar } from "react-bootstrap";
 import App from "./App";
 import Dashboard from "./components/Dashboard";
+import DashboardErrorBoundary from "./components/DashboardErrorBoundary";
+import CommunityTimeline from "./components/CommunityTimeline";
 
 export default function AppRouter() {
   return (
@@ -20,6 +22,9 @@ export default function AppRouter() {
               <Nav.Link as={Link} to="/dashboard">
                 Rewards dashboard
               </Nav.Link>
+              <Nav.Link as={Link} to="/community">
+                Community timeline
+              </Nav.Link>
             </Nav>
           </Navbar.Collapse>
         </Container>
@@ -27,7 +32,15 @@ export default function AppRouter() {
 
       <Routes>
         <Route path="/" element={<App />} />
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route
+          path="/dashboard"
+          element={
+            <DashboardErrorBoundary>
+              <Dashboard />
+            </DashboardErrorBoundary>
+          }
+        />
+        <Route path="/community" element={<CommunityTimeline />} />
       </Routes>
     </>
   );

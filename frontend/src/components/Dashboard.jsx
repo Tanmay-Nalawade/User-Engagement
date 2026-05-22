@@ -8,52 +8,104 @@ import {
   Container,
   Form,
   Modal,
-  ProgressBar,
   Row,
   Spinner,
 } from "react-bootstrap";
 import { fetchDashboard, postCheckIn } from "../api/dashboardApi";
+import { DEMO_DASHBOARD } from "../data/demoDashboard";
 import "./Dashboard.css";
 
 const MILESTONE = 200;
 
 export default function Dashboard() {
-  const [profile, setProfile] = useState(null);
-  const [coupons, setCoupons] = useState([]);
+  const [profile, setProfile] = useState(() => ({ ...DEMO_DASHBOARD.profile }));
+  const [coupons, setCoupons] = useState(() => [...DEMO_DASHBOARD.coupons]);
+  const [stats, setStats] = useState(() => ({ ...DEMO_DASHBOARD.stats }));
   const [location, setLocation] = useState("Phoenix");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [checkingIn, setCheckingIn] = useState(false);
   const [error, setError] = useState("");
+  const [usingDemoFallback, setUsingDemoFallback] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [checkInResult, setCheckInResult] = useState(null);
 
-  const loadDashboard = useCallback(async (loc = location) => {
-    setError("");
-    setLoading(true);
-    try {
-      const data = await fetchDashboard(loc);
+  const applyData = useCallback((data) => {
+    if (data?.profile) {
       setProfile(data.profile);
-      setCoupons(data.coupons);
-      if (data.profile.location) {
-        setLocation(data.profile.location);
-      }
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
     }
-  }, [location]);
+    if (Array.isArray(data?.coupons) && data.coupons.length > 0) {
+      setCoupons(data.coupons);
+    }
+    if (data?.stats) {
+      setStats(data.stats);
+    }
+    if (data?.profile?.location) {
+      setLocation(data.profile.location);
+    }
+  }, []);
+
+  const loadDashboard = useCallback(
+    async (loc = location) => {
+      setLoading(true);
+      setError("");
+
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 8000);
+
+      try {
+        const data = await fetchDashboard(loc, controller.signal);
+        applyData(data);
+        setUsingDemoFallback(false);
+      } catch (err) {
+        applyData(DEMO_DASHBOARD);
+        setUsingDemoFallback(true);
+        if (err.name !== "AbortError") {
+          setError(
+            `${err.message} — showing demo rewards (start API on port 8080 for live data).`,
+          );
+        }
+      } finally {
+        clearTimeout(timeout);
+        setLoading(false);
+      }
+    },
+    [applyData, location],
+  );
 
   useEffect(() => {
     loadDashboard();
   }, []);
 
   const handleCheckIn = async () => {
+    if (usingDemoFallback) {
+      const nextPoints = (profile?.points ?? 95) + 10;
+      setProfile((p) => ({
+        ...p,
+        points: nextPoints,
+        consecutiveWeeks: Math.min(2, (p?.consecutiveWeeks ?? 2) + 1),
+        lastCheckIn: new Date().toISOString(),
+      }));
+      setCoupons((list) =>
+        list.map((c) => ({
+          ...c,
+          locked: nextPoints < (c.pointsCost ?? 200),
+        })),
+      );
+      setCheckInResult({
+        message: "Demo mode: +10 points (connect API for real check-ins)",
+        pointsEarned: 10,
+        totalPoints: nextPoints,
+        milestoneUnlocked: nextPoints >= MILESTONE,
+      });
+      setShowModal(true);
+      return;
+    }
+
     setCheckingIn(true);
     setError("");
     try {
       const data = await postCheckIn();
-      setProfile(data.profile);
+      applyData(data);
       setCheckInResult(data.checkIn);
       setShowModal(true);
       await loadDashboard(location);
@@ -64,31 +116,46 @@ export default function Dashboard() {
     }
   };
 
-  const points = profile?.points ?? 0;
+  const points = Number(profile?.points) || 0;
   const unlocked = points >= MILESTONE;
   const progressPct = Math.min(100, Math.round((points / MILESTONE) * 100));
+  const safeCoupons = Array.isArray(coupons) ? coupons : DEMO_DASHBOARD.coupons;
+  const unlockedCount = safeCoupons.filter((c) => !c.locked).length;
+  const streakWeeks = profile?.consecutiveWeeks ?? 0;
   const streakLabel =
-    profile?.consecutiveWeeks === 0
+    streakWeeks === 0
       ? "Start your weekly streak"
-      : `Week ${profile.consecutiveWeeks} of 3 in current cycle`;
+      : `Week ${streakWeeks} of 3 in current cycle`;
 
   return (
     <div className="dashboard-page">
-      <div className="dashboard-hero">
+      <header className="dashboard-hero">
         <Container>
           <Row className="align-items-end g-4">
-            <Col md={6}>
+            <Col xs={12} md={4}>
               <p className="dashboard-hero__label mb-1">Epi-Guard Rewards</p>
               <div className="dashboard-hero__points">{points}</div>
               <p className="mb-0">Wellness points earned</p>
             </Col>
-            <Col md={6}>
+            <Col xs={12} md={4}>
               <p className="dashboard-hero__label mb-1">Weekly streak</p>
-              <h3 className="mb-2">{streakLabel}</h3>
+              <h3 className="mb-2 dashboard-hero__heading">{streakLabel}</h3>
               {profile?.lastCheckIn && (
-                <small className="d-block opacity-75">
+                <small className="d-block dashboard-hero__sub">
                   Last check-in:{" "}
                   {new Date(profile.lastCheckIn).toLocaleDateString()}
+                </small>
+              )}
+            </Col>
+            <Col xs={12} md={4}>
+              <p className="dashboard-hero__label mb-1">Your rewards</p>
+              <h3 className="mb-0 dashboard-hero__heading">
+                {unlockedCount} / {safeCoupons.length} unlocked
+              </h3>
+              {stats && (
+                <small className="d-block dashboard-hero__sub mt-1">
+                  {stats.nearbyCoupons} offers near{" "}
+                  {profile?.location || location}
                 </small>
               )}
             </Col>
@@ -101,34 +168,54 @@ export default function Dashboard() {
                 {points} / {MILESTONE} pts
               </span>
             </div>
-            <ProgressBar
-              now={progressPct}
-              label={`${progressPct}%`}
-              variant="warning"
-            />
+            <div className="progress dashboard-progress__bar">
+              <div
+                className="progress-bar bg-warning"
+                role="progressbar"
+                style={{ width: `${progressPct}%` }}
+                aria-valuenow={progressPct}
+                aria-valuemin={0}
+                aria-valuemax={100}
+              >
+                {progressPct}%
+              </div>
+            </div>
             {!unlocked && (
-              <small className="d-block mt-2 opacity-90">
-                Earn {MILESTONE - points} more points to unlock coupon codes
+              <small className="d-block mt-2 dashboard-hero__sub">
+                Earn {Math.max(0, MILESTONE - points)} more points to unlock all
+                codes
               </small>
             )}
             {unlocked && (
-              <Badge bg="warning" text="dark" className="mt-2">
-                Coupons unlocked!
-              </Badge>
+              <span className="badge bg-warning text-dark mt-2">
+                All coupons unlocked!
+              </span>
             )}
           </div>
         </Container>
-      </div>
+      </header>
 
-      <Container>
+      <Container className="dashboard-body">
+        {usingDemoFallback && (
+          <Alert variant="info" className="mt-3 mb-0">
+            Showing <strong>demo rewards</strong>. Start the API on port{" "}
+            <strong>8080</strong> for live data.
+          </Alert>
+        )}
+
         {error && (
-          <Alert variant="danger" dismissible onClose={() => setError("")}>
+          <Alert
+            variant="warning"
+            className="mt-3 mb-0"
+            dismissible
+            onClose={() => setError("")}
+          >
             {error}
           </Alert>
         )}
 
-        <Row className="align-items-end mb-4 g-3">
-          <Col md={6}>
+        <Row className="align-items-end mb-4 g-3 mt-2">
+          <Col xs={12} md={6}>
             <Form.Group>
               <Form.Label>Your area (for local coupons)</Form.Label>
               <Form.Control
@@ -138,86 +225,77 @@ export default function Dashboard() {
               />
             </Form.Group>
           </Col>
-          <Col md={3}>
+          <Col xs={12} md={3}>
             <Button
               variant="outline-success"
+              className="w-100"
               onClick={() => loadDashboard(location)}
               disabled={loading}
             >
-              Update location
+              {loading ? "Updating…" : "Update location"}
             </Button>
           </Col>
-          <Col md={3} className="text-md-end">
+          <Col xs={12} md={3}>
             <Button
-              className="check-in-btn"
+              className="check-in-btn w-100"
               variant="success"
               size="lg"
               onClick={handleCheckIn}
-              disabled={checkingIn || loading}
+              disabled={checkingIn}
             >
               {checkingIn ? "Checking in…" : "Weekly check-in"}
             </Button>
           </Col>
         </Row>
 
-        <h4 className="mb-3">Localized rewards</h4>
+        <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+          <h4 className="mb-0 text-dark">Localized rewards</h4>
+          <span className="badge rounded-pill bg-success">
+            {safeCoupons.length} offers
+          </span>
+          {loading && (
+            <Spinner animation="border" size="sm" variant="success" />
+          )}
+        </div>
 
-        {loading ? (
-          <div className="text-center py-5">
-            <Spinner animation="border" variant="success" />
-          </div>
-        ) : coupons.length === 0 ? (
-          <Alert variant="warning">
-            No rewards loaded. Start the API on port 8080, keep this UI on{" "}
-            <strong>http://localhost:5173/dashboard</strong> (Vite) or{" "}
-            <strong>http://localhost:3000/dashboard</strong> (Docker) — not port
-            8080.
-            <div className="mt-3">
-              <Button variant="outline-success" onClick={() => loadDashboard(location)}>
-                Retry
-              </Button>
-            </div>
-          </Alert>
-        ) : (
-          <Row xs={1} md={2} lg={3} className="g-4">
-            {coupons.map((coupon) => (
-              <Col key={coupon.id}>
-                <Card
-                  className={`coupon-card ${coupon.locked ? "coupon-card--frozen" : ""}`}
-                >
-                  {coupon.locked && (
-                    <div className="coupon-card__lock">
-                      <span className="coupon-card__lock-icon" aria-hidden>
-                        🔒
+        <Row xs={1} md={2} lg={3} className="g-4 pb-4">
+          {safeCoupons.map((coupon) => (
+            <Col key={coupon.id}>
+              <Card
+                className={`coupon-card h-100 ${coupon.locked ? "coupon-card--locked" : "coupon-card--unlocked"}`}
+              >
+                <Card.Body className="coupon-card__body">
+                  <div className="d-flex justify-content-between align-items-start mb-2 gap-2">
+                    <span className="badge bg-secondary">{coupon.category}</span>
+                    {coupon.locked ? (
+                      <span className="badge bg-light text-dark">
+                        Locked · {coupon.pointsCost ?? 200} pts
                       </span>
-                      <strong>Unlocks at 200 points</strong>
-                      <small className="text-muted mt-1">
-                        Keep checking in each week
-                      </small>
-                    </div>
-                  )}
-                  <Card.Body className="coupon-card__body">
-                    <Badge bg="secondary" className="mb-2">
-                      {coupon.category}
-                    </Badge>
-                    <Card.Title>{coupon.title}</Card.Title>
-                    <Card.Text className="text-muted">
-                      {coupon.description}
-                    </Card.Text>
-                    <small className="text-muted d-block mb-2">
-                      Area: {coupon.geographicArea}
-                    </small>
-                    <span
-                      className={`coupon-card__code ${!coupon.locked ? "coupon-card__code--live" : ""}`}
-                    >
-                      {coupon.locked ? "••••••••" : coupon.code}
-                    </span>
-                  </Card.Body>
-                </Card>
-              </Col>
-            ))}
-          </Row>
-        )}
+                    ) : (
+                      <span className="badge bg-success">Unlocked</span>
+                    )}
+                  </div>
+                  <Card.Title className="text-dark">{coupon.title}</Card.Title>
+                  <Card.Text className="text-muted">
+                    {coupon.description}
+                  </Card.Text>
+                  <small className="text-muted d-block mb-3">
+                    Area: {coupon.geographicArea}
+                  </small>
+                  <div
+                    className={
+                      coupon.locked
+                        ? "coupon-card__code coupon-card__code--locked"
+                        : "coupon-card__code coupon-card__code--live"
+                    }
+                  >
+                    {coupon.locked ? "Unlock with more points" : coupon.code}
+                  </div>
+                </Card.Body>
+              </Card>
+            </Col>
+          ))}
+        </Row>
       </Container>
 
       <Modal show={showModal} onHide={() => setShowModal(false)} centered>
@@ -229,16 +307,12 @@ export default function Dashboard() {
             <>
               <Alert variant="success">{checkInResult.message}</Alert>
               <p className="mb-1">
-                <strong>+{checkInResult.pointsEarned}</strong> points this check-in
+                <strong>+{checkInResult.pointsEarned}</strong> points this
+                check-in
               </p>
               <p className="mb-0">
                 Total: <strong>{checkInResult.totalPoints}</strong> points
               </p>
-              {checkInResult.milestoneUnlocked && (
-                <Alert variant="warning" className="mt-3 mb-0">
-                  You reached 200 points — your coupons are now unlocked!
-                </Alert>
-              )}
             </>
           )}
         </Modal.Body>
