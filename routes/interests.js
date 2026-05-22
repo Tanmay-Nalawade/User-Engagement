@@ -1,12 +1,16 @@
 const express = require("express");
 const {
-  validateCreateOrReplace,
+  validateCreate,
+  validateReplaceById,
+  validateUpsertByUser,
   validatePartialUpdate,
 } = require("../validators/interestsValidator");
 const {
   getInterests,
+  getInterestsByUser,
   listInterests,
   createInterests,
+  upsertInterestsByUser,
   replaceInterests,
   updateInterests,
   deleteInterests,
@@ -14,10 +18,12 @@ const {
 
 const router = express.Router();
 
+router.get("/user/:user", getInterestsByUser);
+router.put("/user/:user", validateUpsertByUser, upsertInterestsByUser);
 router.get("/", listInterests);
-router.post("/", validateCreateOrReplace, createInterests);
+router.post("/", validateCreate, createInterests);
 router.get("/:id", getInterests);
-router.put("/:id", validateCreateOrReplace, replaceInterests);
+router.put("/:id", validateReplaceById, replaceInterests);
 router.patch("/:id", validatePartialUpdate, updateInterests);
 router.delete("/:id", deleteInterests);
 

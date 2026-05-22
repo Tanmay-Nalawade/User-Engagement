@@ -2,6 +2,12 @@ const mongoose = require("mongoose");
 
 const interestsSchema = new mongoose.Schema(
   {
+    user: {
+      type: String,
+      trim: true,
+      index: true,
+      default: null,
+    },
     householdMembers: {
       type: Number,
       min: 0,

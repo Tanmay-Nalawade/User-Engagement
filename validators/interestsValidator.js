@@ -106,8 +106,42 @@ const validateInterestsBody = (body, { partial = false } = {}) => {
   return errors;
 };
 
-const validateCreateOrReplace = (req, res, next) => {
+const validateUserField = (body, errors) => {
+  if (
+    body.user !== undefined &&
+    body.user !== null &&
+    body.user !== "" &&
+    !isNonEmptyString(body.user)
+  ) {
+    errors.push("user must be a non-empty string when provided");
+  }
+};
+
+const validateCreate = (req, res, next) => {
   const errors = validateInterestsBody(req.body);
+  validateUserField(req.body, errors);
+
+  if (errors.length > 0) {
+    return res.status(400).json({ error: "Validation failed", details: errors });
+  }
+  next();
+};
+
+const validateReplaceById = (req, res, next) => {
+  const errors = validateInterestsBody(req.body);
+  if (errors.length > 0) {
+    return res.status(400).json({ error: "Validation failed", details: errors });
+  }
+  next();
+};
+
+const validateUpsertByUser = (req, res, next) => {
+  const errors = validateInterestsBody(req.body);
+
+  if (!isNonEmptyString(req.params.user)) {
+    errors.push("user is required in URL");
+  }
+
   if (errors.length > 0) {
     return res.status(400).json({ error: "Validation failed", details: errors });
   }
@@ -124,6 +158,8 @@ const validatePartialUpdate = (req, res, next) => {
 
 module.exports = {
   HOUSING_OPTIONS,
-  validateCreateOrReplace,
+  validateCreate,
+  validateReplaceById,
+  validateUpsertByUser,
   validatePartialUpdate,
 };

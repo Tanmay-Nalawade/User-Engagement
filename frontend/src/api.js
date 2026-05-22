@@ -1,9 +1,7 @@
 const API_BASE = import.meta.env.VITE_API_URL || "";
 
 export async function createInterests(payload) {
-  const url = `${API_BASE}/interests`;
-
-  const res = await fetch(url, {
+  const res = await fetch(`${API_BASE}/interests`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),

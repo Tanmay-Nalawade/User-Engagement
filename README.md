@@ -24,21 +24,24 @@ Health check: `GET http://localhost:8080/health`
 
 ## Interests API
 
-No authentication. Records are identified by MongoDB `_id`.
+Each profile may include an optional **`user`** field (set by another service when linking accounts — not collected in this form).
 
 | Method | Path | Description |
 |--------|------|-------------|
-| `GET` | `/interests` | List all interests profiles |
-| `POST` | `/interests` | Create a new profile |
-| `GET` | `/interests/:id` | Read one profile |
-| `PUT` | `/interests/:id` | Replace a profile |
+| `GET` | `/interests` | List all profiles (`?user=` to filter) |
+| `GET` | `/interests/user/:user` | Latest profile for a user |
+| `PUT` | `/interests/user/:user` | Upsert profile for a user (external apps) |
+| `POST` | `/interests` | Create profile |
+| `GET` | `/interests/:id` | Read by MongoDB id |
+| `PUT` | `/interests/:id` | Replace by MongoDB id |
 | `PATCH` | `/interests/:id` | Partial update |
-| `DELETE` | `/interests/:id` | Delete a profile |
+| `DELETE` | `/interests/:id` | Delete |
 
 Example create body:
 
 ```json
 {
+  "user": "auth0|abc123",
   "householdMembers": 3,
   "timeOutdoors": "1-2 hours daily",
   "occupation": "Healthcare worker",

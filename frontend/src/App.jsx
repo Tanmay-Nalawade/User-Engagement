@@ -467,7 +467,11 @@ export default function App() {
               </li>
             </ul>
           </>,
-          nav(submitting ? "Saving…" : "Submit profile", handleSubmit, submitting),
+          nav(
+            submitting ? "Saving…" : "Submit profile",
+            handleSubmit,
+            submitting,
+          ),
         );
 
       default:

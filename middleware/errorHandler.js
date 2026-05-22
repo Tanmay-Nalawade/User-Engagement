@@ -3,6 +3,12 @@ const errorHandler = (err, req, res, next) => {
     return next(err);
   }
 
+  if (err.code === 11000) {
+    return res.status(409).json({
+      error: "Duplicate value for a unique field",
+    });
+  }
+
   if (err.name === "ValidationError") {
     return res.status(400).json({
       error: "Validation failed",
