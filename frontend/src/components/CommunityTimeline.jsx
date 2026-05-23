@@ -83,7 +83,7 @@ export default function CommunityTimeline() {
       body: trimmedBody,
       timestamp: new Date(now).toISOString(),
       upstamp_count: 0,
-      category: "Community",
+      category: "Environment",
       topic: "User post",
       location: locationFilter || "Local",
     });
@@ -223,7 +223,7 @@ export default function CommunityTimeline() {
                     <option value="all">All</option>
                     <option value="Animal">Animal</option>
                     <option value="Human">Human</option>
-                    <option value="Community">Community</option>
+                    <option value="Environment">Environment</option>
                   </Form.Select>
                 </Form.Group>
               </Col>
@@ -291,7 +291,9 @@ export default function CommunityTimeline() {
                                     ? "warning"
                                     : msg.category === "Human"
                                       ? "primary"
-                                      : "secondary"
+                                      : msg.category === "Environment"
+                                        ? "success"
+                                        : "secondary"
                                 }
                                 text={
                                   msg.category === "Animal" ? "dark" : undefined
